@@ -2,13 +2,15 @@
 """
 script to start a flask web application
 """
-
-from models import State, City, Amenity, Place, storage
+from models import storage
+from models.state import State
+from models.amenity import Amenity
+from models.place import Place
 from flask import Flask, render_template
 import uuid
 
+
 app = Flask(__name__)
-app.debug = True
 
 
 @app.teardown_appcontext
@@ -19,22 +21,26 @@ def teardown(Exception):
     storage.close()
 
 
-@app.route("/0-hbnb", strict_slashes=False, methods=["GET", "POST"])
+@app.route("/0-hbnb", strict_slashes=False)
 def last():
-    """
+    """ HBNB is alive! """
+    states = storage.all(State).values()
+    states = sorted(states, key=lambda k: k.name)
+    st_ct = []
 
-    /hbnb_filters: display a HTML page like 6-index.html,
-    which was done during the project 0x01. AirBnB clone - Web static
-        State, City and Amenity objects must be loaded
-        from DBStorage and sorted by name (A->Z)
-    """
-    return render_template(
-        "0-hbnb.html",
-        states=storage.all(State),
-        amenities=storage.all(Amenity),
-        places=storage.all(Place),
-        cache_id=uuid.uuid4()
-    )
+    for state in states:
+        st_ct.append([state, sorted(state.cities, key=lambda k: k.name)])
+
+    amenities = storage.all(Amenity).values()
+    amenities = sorted(amenities, key=lambda k: k.name)
+
+    places = storage.all(Place).values()
+    places = sorted(places, key=lambda k: k.name)
+
+    return render_template('0-hbnb.html',
+                           states=st_ct,
+                           amenities=amenities,
+                           places=places, cache_id=uuid.uuid4())
 
 
 if __name__ == "__main__":

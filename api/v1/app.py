@@ -3,8 +3,7 @@
 script to start a flask application sever
 """
 
-from flask import Flask, Blueprint, \
-            render_template, abort, make_response, jsonify
+from flask import Flask, Blueprint, make_response, jsonify
 from models import storage
 from api.v1.views import app_views
 from os import getenv
@@ -35,5 +34,5 @@ def notfound(e):
 
 if __name__ == "__main__":
     host = getenv("HBNB_API_HOST", "0.0.0.0")
-    port = getenv("HBNB_API_PORT", 5000)
+    port = int(getenv("HBNB_API_PORT", 5000))
     app.run(host=host, port=port, threaded=True)

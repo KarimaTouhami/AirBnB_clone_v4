@@ -1,41 +1,32 @@
-#!usr/bin/python3
-"""
-script to start a flask web application
-"""
-
-from models import State, City, Amenity, Place, storage
+#!/usr/bin/python3
+"""Flask app to generate complete html page containing location/amenity
+dropdown menus and rental listings"""
 from flask import Flask, render_template
+from models import storage
 import uuid
+app = Flask('web_dynamic')
+app.url_map.strict_slashes = False
 
-app = Flask(__name__)
-app.debug = True
+
+@app.route('/3-hbnb')
+def display_hbnb():
+    """Generate page with popdown menu of states/cities"""
+    states = storage.all('State')
+    amenities = storage.all('Amenity')
+    places = storage.all('Place')
+    cache_id = uuid.uuid4()
+    return render_template('3-hbnb.html',
+                           states=states,
+                           amenities=amenities,
+                           places=places,
+                           cache_id=cache_id)
 
 
 @app.teardown_appcontext
-def teardown(Exception):
-    """
-    remove the current SQLAlchemy Session
-    """
+def teardown_db(*args, **kwargs):
+    """Close database or file storage"""
     storage.close()
 
 
-@app.route("/3-hbnb", strict_slashes=False, methods=["GET", "POST"])
-def last():
-    """
-
-    /hbnb_filters: display a HTML page like 6-index.html,
-    which was done during the project 0x01. AirBnB clone - Web static
-        State, City and Amenity objects must be loaded
-        from DBStorage and sorted by name (A->Z)
-    """
-    return render_template(
-        "3-hbnb.html",
-        states=storage.all(State),
-        amenities=storage.all(Amenity),
-        places=storage.all(Place),
-        cache_id=uuid.uuid4()
-    )
-
-
-if __name__ == "__main__":
-    app.run()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
